@@ -35,8 +35,40 @@ Diagnostics of AIDS
 
 Test:
 
-$P(+|AIDS) = 0.98 \quad  P(-|AIDS) = 0.02 \quad P(+|noAIDS) = 0.03  \quad P(+|AIDS) = 0.97$
+Sensitivity: P(+|AIDS) = 0.98
+
+Specificity: P(-|noAIDS) = 0.97
+
+$P(+|AIDS) = 0.98 \quad  P(-|AIDS) = 0.02 \quad P(+|noAIDS) = 0.03  \quad P(-|noAIDS) = 0.97$
 
 
 
-$P(AIDS\mid+) = \frac{P(+ \mid AIDS) \, P(AIDS)}{P(+ \mid AIDS)P(AIDS) + P(+ \mid noAIDS)P(noAIDS)} = \frac{0.98 \times 0.001}{0.98 \times 0.001 + 0.03 \times 0.999} = 0.032$
+$P(AIDS\mid+) = \frac{P(+\mid AIDS) \, P(AIDS)}{P(+\mid AIDS)P(AIDS) + P(+\mid noAIDS)P(noAIDS)} = \frac{0.98\times0.001}{0.98\times0.001 + 0.03\times0.999} = 0.032$
+
+
+```{r}
+```
+
+
+```{r}
+
+
+calc_prob_of_positive <-
+  function(infection_rate, sensitivity, specificity) {
+    sensitivity * infection_rate / (sensitivity * infection_rate + (1 - specificity) * (1 -
+                                                                                          infection_rate))
+  }
+
+data <-
+  expand_grid(
+    infection_rate = seq(0.01, 0.96, .05),
+    sensitivity = seq(0.9, 0.99, 0.01),
+    specificity = seq(0.9, 0.99, 0.01)
+  ) %>%
+  mutate(probability_positive = calc_prob_of_positive(infection_rate, sensitivity, specificity))
+```
+
+```{r}
+data %>% arrange(probability_positive) 
+```
+
