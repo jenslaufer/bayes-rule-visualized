@@ -1,0 +1,42 @@
+---
+title: "Bayes Theorem"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F, message = F, warning = F)
+```
+
+```{r}
+library(tidyverse)
+```
+
+## Formula
+
+$P(A \mid B) = \frac{P(B \mid A) \, P(A)}{P(B)}$
+
+
+$P(Theory \mid Data) = \frac{P(Data \mid Theory) \, P(Theory)}{P(Data)}$
+
+$Posterior: P(Theory \mid Data) \quad Likelihood: P(Data \mid Theory) \quad Prior: P(Theory)  \quad Evidenz:  {P(Data)}$
+
+
+
+
+
+### Examples
+
+Diagnostics of AIDS
+
+1 out of thousands has AIDS.
+
+
+Test:
+
+$P(+|AIDS) = 0.98 \quad  P(-|AIDS) = 0.02 \quad P(+|noAIDS) = 0.03  \quad P(+|AIDS) = 0.97$
+
+
+
+$P(AIDS\mid+) = \frac{P(+ \mid AIDS) \, P(AIDS)}{P(+ \mid AIDS)P(AIDS) + P(+ \mid noAIDS)P(noAIDS)} = \frac{0.98 \times 0.001}{0.98 \times 0.001 + 0.03 \times 0.999} = 0.032$
