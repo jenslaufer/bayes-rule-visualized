@@ -87,10 +87,6 @@ calc_prob_of_negative <-
     )
   }
 
-
-calc_prob_of_positive(0.1, 0.873, .99)
-calc_prob_of_negative(0.1, 0.873, .99)
-
 ```
 
 ```{r}
