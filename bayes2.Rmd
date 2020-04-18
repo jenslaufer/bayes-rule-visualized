@@ -1,0 +1,146 @@
+---
+title: "Bayes Theorem"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F, message = F, warning = F)
+```
+
+```{r}
+library(tidyverse)
+library(ggthemes)
+```
+
+## Formula
+
+$P(A \mid B) = \frac{P(B \mid A) \, P(A)}{P(B)}$
+
+
+$P(Theory \mid Data) = \frac{P(Data \mid Theory) \, P(Theory)}{P(Data)}$
+
+$Posterior: P(Theory \mid Data) \quad Likelihood: P(Data \mid Theory) \quad Prior: P(Theory)  \quad Evidenz:  {P(Data)}$
+
+
+
+
+
+### Examples
+
+Diagnostics of AIDS
+
+1 out of thousands has AIDS.
+
+
+Test:
+
+Sensitivity: P(+|AIDS) = 0.98
+
+Specificity: P(-|noAIDS) = 0.97
+
+$P(+|AIDS) = 0.98 \quad  P(-|AIDS) = 0.02 \quad P(+|noAIDS) = 0.03  \quad P(-|noAIDS) = 0.97$
+
+
+
+$P(AIDS\mid+) = \frac{P(+\mid AIDS) \, P(AIDS)}{P(+\mid AIDS)P(AIDS) + P(+\mid noAIDS)P(noAIDS)} = \frac{0.98\times0.001}{0.98\times0.001 + 0.03\times0.999} = 0.032$
+
+
+
+
+```{r}
+`p(a|b)` <- function(`p(b|a)`, `p(a)`, `p(b)`) {
+  `p(b|a)` * `p(a)` / `p(b)`
+}
+
+`p(b)` <- function(`p(a)`, `p(b|a)`, `p(¬a)`, `p(b|¬a)`) {
+  `p(a)` * `p(b|a)` + `p(¬a)` *  `p(b|¬a)`
+}
+
+
+calc_prob_of_positive <-
+  function(infection_rate, sensitivity, specificity) {
+    `p(a|b)`(
+      sensitivity,
+      infection_rate,
+      `p(b)`(
+        sensitivity,
+        infection_rate,
+        1 - specificity,
+        1 - infection_rate
+      )
+    )
+  }
+
+calc_prob_of_negative <-
+  function(infection_rate, sensitivity, specificity) {
+    `p(a|b)`(
+      specificity,
+      1-infection_rate,
+      `p(b)`(
+        specificity,
+        1-infection_rate,
+        1-sensitivity,
+        infection_rate
+      )
+    )
+  }
+
+
+calc_prob_of_positive(0.1, 0.873, .99)
+calc_prob_of_negative(0.1, 0.873, .99)
+
+```
+
+```{r}
+
+data <-
+  expand_grid(
+    infection_rate = seq(0.005, 0.99, .005),
+    sensitivity = seq(0.9, 0.99, 0.001),
+    specificity = seq(0.9, 0.99, 0.001)
+  ) %>%
+  mutate(probability_positive = calc_prob_of_positive(infection_rate, sensitivity, specificity))
+```
+
+```{r fig.height=30, fig.width=30}
+data %>% 
+  mutate(infection_rate_bin = cut(infection_rate,10), 
+         probability_positive_quality=ifelse(probability_positive > 0.9, "Good","Bad")) %>% 
+  ggplot(aes(x=sensitivity, y=specificity, color=probability_positive_quality)) +
+  geom_point(size=4) +
+  scale_color_manual(values = c("Bad" = "#E15759", "Good" = "#59A14F")) +
+  facet_wrap(~infection_rate_bin)
+```
+
+```{r}
+read_csv("countries_infection_rates.csv")
+```
+
+
+```{r}
+countries_infection_rates <- expand_grid(
+  read_csv("countries_infection_rates.csv") %>% 
+  mutate_if(is.numeric, funs((.)/100)),
+  sensitivity = seq(0.9, 0.99, 0.001),
+  specificity = seq(0.9, 0.99, 0.001)
+)  %>% 
+  mutate(probability_positive= calc_prob_of_positive(infection_rate, sensitivity, specificity)) %>% 
+  mutate(probability_positive_quality=ifelse(probability_positive > 0.6, "Good","Bad"))
+  
+```
+
+```{r fig.height=20, fig.width=20}
+countries_infection_rates %>% 
+  ggplot(aes(x=sensitivity, y=specificity, color=probability_positive_quality)) +
+  geom_point() + 
+  scale_color_manual(values = c("Bad" = "#E15759", "Good" = "#59A14F")) +
+  facet_wrap(~country)
+  
+  
+
+```
+
+
+
