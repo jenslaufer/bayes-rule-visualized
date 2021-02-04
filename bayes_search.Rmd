@@ -68,7 +68,6 @@ plotSearched <- function(data) {
   gridExtra::grid.arrange(p3, nrow = 1)
   
 }
-
 ```
 ```{r}
 
@@ -104,9 +103,6 @@ data <- NULL
 for(i in seq(0,1000)){
   data <- getData(data)
 }
-```
-```{r}
-data %>% plotSearched()
 ```
 
 
