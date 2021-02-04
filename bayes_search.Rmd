@@ -1,0 +1,114 @@
+---
+title: "Bayes Search Theory"
+author: "Jens Laufer"
+date: "4 2 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = T, message = T, echo = T)
+```
+
+```{r}
+library(tidyverse)
+library(glue)
+library(scales)
+library(bbplot)
+library(ggthemes)
+```
+```{r}
+detectionPower <-
+  function(x,
+           y,
+           dx = 10,
+           dy = 5,
+           p0 = 0.975,
+           d = 0.925) {
+    x2 <- x - dx
+    y2 <- y - dx
+    r <- sqrt(x2 ^ 2 + y2 ^ 2)
+    power <- p0 * d ^ r
+  }
+
+bayesUpdate <- function(searched, p0, pD) {
+  (p0 * (1 - searched * pD)) / (1 - p0 + p0 * (1 - pD))
+}
+
+plotSearched <- function(data) {
+  p1 <- data %>%
+    ggplot(aes(
+      x = x,
+      y = y,
+      z = PrP,
+      color = searched
+    )) +
+    geom_point(aes(alpha = PrP)) +
+    scale_color_tableau() +
+    stat_contour()
+  p2 <- data %>%
+    ggplot(aes(
+      x = x,
+      y = y,
+      z = PrD,
+      color = searched
+    )) +
+    geom_point(aes(alpha = PrD)) +
+    scale_color_tableau() +
+    stat_contour(binwidth = 0.1)
+  p3 <- data %>%
+    ggplot(aes(
+      x = x,
+      y = y,
+      z = valueOfSearch,
+      color = searched
+    )) +
+    geom_point(aes(alpha = valueOfSearch)) +
+    scale_color_tableau() +
+    stat_contour()
+  gridExtra::grid.arrange(p3, nrow = 1)
+  
+}
+
+```
+```{r}
+
+getData <- function(data = NULL) {
+  if (is.null(data)) {
+    data <-
+      tibble(
+        x = rep(seq(-30, 30), each = 61),
+        y = rep(seq(-30, 30), times = 61),
+        searched = rep(F, times = 3721),
+        valueOfSearch = rep(NA, times = 3721)
+      )
+    
+  }
+  data %>%
+    mutate(
+      PrP = dnorm(x, 0, sqrt(100)) * dnorm(y, 0, sqrt(100)),
+      PrD = detectionPower(x, y),
+      valueOfSearch = if_else(
+        is.na(valueOfSearch),
+        PrP * PrD,
+        bayesUpdate(searched, PrP, PrD)
+      ),
+      searched = if_else(searched==F, rank(-1 * valueOfSearch) <= 100, T)
+    )
+}
+data <- getData()
+```
+
+
+```{r}
+data <- NULL
+for(i in seq(0,1000)){
+  data <- getData(data)
+}
+```
+```{r}
+data %>% plotSearched()
+```
+
+
+
+

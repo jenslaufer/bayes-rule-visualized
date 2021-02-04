@@ -17,7 +17,6 @@ library(tidyverse)
 
 $P(A \mid B) = \frac{P(B \mid A) \, P(A)}{P(B)}$
 
-
 $P(Theory \mid Data) = \frac{P(Data \mid Theory) \, P(Theory)}{P(Data)}$
 
 $Posterior: P(Theory \mid Data) \quad Likelihood: P(Data \mid Theory) \quad Prior: P(Theory)  \quad Evidenz:  {P(Data)}$
